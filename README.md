@@ -1,26 +1,25 @@
 # Syringe Pump
 
-A small, 3D-printed syringe pump built around an Arduino Uno, a 28BYJ-48 stepper motor and a T8 lead screw. The idea was to make a simple mechanism that can push a syringe plunger at a controlled, adjustable rate, with the flow rate calculated and displayed on a 16x2 LCD.
+A smallish, mostly 3D printed syringe pump built around an Arduino Uno, a 28BYJ-48 stepper motor, Ender roller and a T8 lead screw. The idea was to make a simple mechanism that can push a syringe plunger at a adjustable rate.
+The entire mechanical assembly is custom 3D printed, with a linear carriage that moves along an extrusion and pushes the syringe plunger. The servo is controlled using a potentiometer so that the flow rate can be adjusted while the pump is running.
 
-The entire mechanical assembly is custom 3D printed, with a linear carriage that moves along an extrusion and pushes the syringe plunger. The system is controlled using a potentiometer, so the flow rate can be adjusted while the pump is running.
+## Why?
 
-## Why I made this
+For a larger prototype I am working on, I needed a way to move fluid through a system at a controlled rate. Instead of using a manually operated syringe or trying to control the flow by hand (basically impossible) , I wanted to build a small motorised mechanism that could push the syringe at a consistent speed.
 
-For a larger prototype I am working on, I needed a way to move fluid through a system at a controlled and repeatable rate. Instead of using a manually operated syringe or trying to control the flow by hand, I wanted to build a small motorised mechanism that could push the syringe at a consistent speed.
+Commercial syringe pumps ARE VERRRYYYY expensive (60$+), especially when all I really needed was a relatively simple mechanism with adjustable flow. I decided to build 1 myself, using readily available electronics and 3D printed parts, combining the parts i and eshant had, we had all the parts so there was no need to buy anything!
 
-Commercial syringe pumps can get quite expensive, especially when all I really needed was a relatively simple mechanism with adjustable flow. I decided to build one myself, using readily available electronics and 3D-printed parts. This also meant I could design the mechanical assembly around the dimensions and requirements of the prototype rather than having to adapt everything around an existing pump.
-
-The goal was to keep the design relatively simple, make the syringe removable and interchangeable, and have the flow rate controlled electronically rather than relying on manual operation.
-
-## The build
+## How it works
 
 [INSERT IMAGE: Full assembled syringe pump]
 
-The main structure is built around an extrusion which acts as the guide for the moving carriage. At one end, a 28BYJ-48 stepper motor drives a T8 threaded lead screw. As the screw rotates, it moves a constrained carriage forward or backward along the extrusion. The carriage rides on rollers and has a pusher attached to it, which presses against the syringe plunger.
+The main structure is built around an extrusion which acts as the guide for the moving carriage. At one end, a 28BYJ48 stepper motor drives a T8 threaded lead screw. As the screw rotates, it moves a constrained carriage forward or backward along the extrusion. The carriage rides on rollers and has a pusher attached to it, which presses against the syringe plunger.
 
 At the other end of the extrusion is a separate syringe holder. The syringe sits between the holder and the moving carriage, with its plunger facing the carriage. When the motor turns the lead screw, the carriage moves towards the syringe and pushes the plunger, displacing the liquid inside it. Reversing the motor moves the carriage in the opposite direction.
 
 The syringe holder and the other mechanical components are custom designed and 3D printed. The syringe itself is removable, so different syringes can be fitted without having to rebuild the entire mechanism.
+
+If this is confusing, please watch the video here -> i gotta put the link
 
 [INSERT IMAGE: Close-up of the lead screw, motor and carriage]
 
@@ -38,7 +37,7 @@ One thing I wanted to avoid was displaying only motor RPM, since that doesn't te
 
 [INSERT IMAGE: Electronics setup with Arduino, ULN2003 and LCD]
 
-[INSERT IMAGE: Wiring diagram]
+![Wiring diagram](docs/Wiring_diagram.png)
 
 ## How the flow rate is calculated
 
