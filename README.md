@@ -21,11 +21,7 @@ The syringe holder and the other mechanical components are custom designed and 3
 
 If this is confusing, please watch the video here -> i gotta put the link
 
-[INSERT IMAGE: Close-up of the lead screw, motor and carriage]
-
-[INSERT IMAGE: Close-up showing the syringe holder and plunger pusher]
-
-[INSERT IMAGE: CAD assembly showing all mechanical components]
+![Assembley](docs/assembley.png)
 
 ## Electronics and control
 
