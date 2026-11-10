@@ -1,158 +1,168 @@
-# Ender 3 Syringe Pump Conversion
+# Syringe Pump
 
-A DIY, open-source syringe pump built by repurposing a Creality Ender 3 3D printer. Developed as a hardware project for [Hack Club Forge](https://github.com/hackclub/forge).
+A small, 3D-printed syringe pump built around an Arduino Uno, a 28BYJ-48 stepper motor and a T8 lead screw. The idea was to make a simple mechanism that can push a syringe plunger at a controlled, adjustable rate, with the flow rate calculated and displayed on a 16x2 LCD.
 
-`[INSERT PHOTO: Complete assembled syringe pump]`
+The entire mechanical assembly is custom 3D printed, with a linear carriage that moves along an extrusion and pushes the syringe plunger. The system is controlled using a potentiometer, so the flow rate can be adjusted while the pump is running.
 
----
+## Why I made this
 
-## Motivation
+For a larger prototype I am working on, I needed a way to move fluid through a system at a controlled and repeatable rate. Instead of using a manually operated syringe or trying to control the flow by hand, I wanted to build a small motorised mechanism that could push the syringe at a consistent speed.
 
-Commercial syringe pumps for microfluidics, chemistry experiments, and biological dispensing routinely cost anywhere between \$500 and \$3,000+. At the same time, thousands of Ender 3 printers sit unused in closets, maker spaces, and bedrooms.
+Commercial syringe pumps can get quite expensive, especially when all I really needed was a relatively simple mechanism with adjustable flow. I decided to build one myself, using readily available electronics and 3D-printed parts. This also meant I could design the mechanical assembly around the dimensions and requirements of the prototype rather than having to adapt everything around an existing pump.
 
-An Ender 3 already provides:
-- A rigid aluminum extrusion frame (2020 and 2040 V-slot profiles).
-- A high-torque NEMA 17 stepper motor paired with a T8 lead screw.
-- A 32-bit microcontroller board capable of precise microstepping.
-- An integrated 24V DC power supply and user display interface.
-- A complete motion control system programmable via standard G-code.
+The goal was to keep the design relatively simple, make the syringe removable and interchangeable, and have the flow rate controlled electronically rather than relying on manual operation.
 
-By removing the hotend, extruder, and heated bed and mounting custom 3D-printed syringe fixtures to the linear axis, the printer becomes a rigid, highly controllable precision syringe pump at a fraction of commercial cost.
+## The build
 
----
+[INSERT IMAGE: Full assembled syringe pump]
 
-## How It Works
+The main structure is built around an extrusion which acts as the guide for the moving carriage. At one end, a 28BYJ-48 stepper motor drives a T8 threaded lead screw. As the screw rotates, it moves a constrained carriage forward or backward along the extrusion. The carriage rides on rollers and has a pusher attached to it, which presses against the syringe plunger.
 
-`[INSERT IMAGE: CAD assembly]`
+At the other end of the extrusion is a separate syringe holder. The syringe sits between the holder and the moving carriage, with its plunger facing the carriage. When the motor turns the lead screw, the carriage moves towards the syringe and pushes the plunger, displacing the liquid inside it. Reversing the motor moves the carriage in the opposite direction.
 
-1. **Linear Actuation**: The stock NEMA 17 stepper motor drives a T8 lead screw. A 3D-printed plunger pusher mounted to the carriage travels along the extrusion, exerting direct axial force against the syringe plunger.
-2. **Stationary Retention**: The syringe barrel is locked into a stationary 3D-printed cradle bolted to the aluminum frame. The barrel flange is mechanically captured to prevent axial slipping under backpressure.
-3. **Volumetric Dispensing**: Fluid volume is directly proportional to linear carriage travel:
-   $$\Delta V = \pi \times \left(\frac{D}{2}\right)^2 \times \Delta L$$
-   where $D$ is the inner diameter of the syringe and $\Delta L$ is linear travel.
-4. **Flow Rate Control**: Linear feedrate ($F$ in mm/min) corresponds directly to volumetric flow rate ($Q$ in mL/min).
-5. **Travel Limits**: A physical limit switch homes the plunger at startup and prevents the carriage from over-driving past the syringe's bottom limit.
+The syringe holder and the other mechanical components are custom designed and 3D printed. The syringe itself is removable, so different syringes can be fitted without having to rebuild the entire mechanism.
 
----
+[INSERT IMAGE: Close-up of the lead screw, motor and carriage]
 
-## Project Status
+[INSERT IMAGE: Close-up showing the syringe holder and plunger pusher]
 
-This project is actively in development under Hack Club Forge:
+[INSERT IMAGE: CAD assembly showing all mechanical components]
 
-- [x] Concept & kinematics design
-- [ ] CAD design of custom syringe cradle and plunger pusher (`[SPECIFY: In progress / Ready for printing]`)
-- [ ] 3D printing custom mechanical brackets
-- [ ] Teardown of Ender 3 donor frame
-- [ ] Mechanical test assembly
-- [ ] Controller board wiring and endstop configuration
-- [ ] Firmware configuration (thermal error bypass, steps/mm)
-- [ ] Dry linear calibration with calipers
-- [ ] Wet gravimetric calibration on digital scale
-- [ ] Full fluid dispensing benchmarks
+## Electronics and control
 
----
+The electronics are based around an Arduino Uno. A 28BYJ-48 stepper motor is connected through a ULN2003 driver board, while a potentiometer is used to control the motor speed. A 16x2 LCD with an I2C interface displays the calculated flow rate.
 
-## Repository Structure
+The potentiometer works around a centre position. Turning it towards one side increases the forward speed, while turning it towards the other side reverses the motor. Keeping it around the centre stops the motor. This gives a continuous way of adjusting the pump rather than having to choose between a few fixed speed settings.
+
+One thing I wanted to avoid was displaying only motor RPM, since that doesn't tell the user much about how quickly liquid is actually being displaced. Instead, the Arduino calculates the theoretical flow rate in mL/s using the syringe dimensions and the lead screw's movement per revolution, and displays that value directly.
+
+[INSERT IMAGE: Electronics setup with Arduino, ULN2003 and LCD]
+
+[INSERT IMAGE: Wiring diagram]
+
+## How the flow rate is calculated
+
+The flow rate depends on two things: how far the syringe plunger moves and the internal cross-sectional area of the syringe barrel.
+
+For this build, the lead screw has a pitch of 2 mm and four starts, giving a lead of 8 mm per revolution. This means that one complete rotation moves the carriage by 8 mm.
+
+The volume displaced in one revolution is therefore:
+
+\[
+V = \frac{\pi D^2}{4} \times L
+\]
+
+Where:
+
+- \(D\) is the internal diameter of the syringe barrel in mm.
+- \(L\) is the lead screw lead in mm per revolution.
+
+The flow rate is then calculated using:
+
+\[
+Q = \frac{\pi D^2}{4} \times \frac{L \times RPM}{60000}
+\]
+
+The result is in mL/s.
+
+For the current setup, the code uses an approximate syringe internal diameter of 16 mm and a lead screw lead of 8 mm. These values can be changed in the firmware to accommodate different syringe dimensions.
+
+This means the calculation isn't tied to one particular syringe capacity. As long as the internal diameter is known, the firmware can calculate the corresponding theoretical flow rate.
+
+## Firmware
+
+The pump is controlled using an Arduino Uno and the Arduino firmware is in the `Firmware` folder.
+
+The code uses the following libraries:
+
+- `Wire.h` for I2C communication.
+- `LiquidCrystal_I2C.h` for the LCD.
+- `AccelStepper.h` for controlling the stepper motor.
+
+To get it running, install these libraries through the Arduino IDE Library Manager, open `Firmware/Arduino-code.cpp`, select the Arduino Uno as the board, and upload the code.
+
+The current pin configuration is:
+
+| Component | Arduino pin |
+|---|---|
+| ULN2003 IN1 | D8 |
+| ULN2003 IN2 | D9 |
+| ULN2003 IN3 | D10 |
+| ULN2003 IN4 | D11 |
+| Potentiometer output | A0 |
+| LCD SDA | A4 |
+| LCD SCL | A5 |
+
+The LCD uses I2C address `0x27`.
+
+A few values can be changed directly in the code depending on the hardware being used:
+
+| Variable | Current value | Purpose |
+|---|---:|---|
+| `Diameter` | 16.0 mm | Internal syringe diameter |
+| `Lead_MM` | 8.0 mm | Lead screw movement per revolution |
+| `Steps_per_rev` | 4096 | Approximate motor output steps per revolution |
+| `max_rpm` | 10.0 | Maximum lead screw RPM |
+| `deadzone` | 35 | Potentiometer centre deadzone |
+
+The flow rate shown on the LCD is calculated from these values, so changing the syringe or lead screw dimensions requires updating the corresponding variables.
+
+## Assembly
+
+The complete assembly consists of the extrusion, lead screw, stepper motor, moving carriage, syringe holder and the printed brackets and supports.
+
+[INSERT IMAGE: Exploded CAD view of the assembly]
+
+[INSERT IMAGE: Motor mounting and lead screw connection]
+
+[INSERT IMAGE: Carriage and roller arrangement]
+
+[INSERT IMAGE: Syringe installed in the holder]
+
+The motor is mounted at one end of the extrusion and connected to the lead screw. The lead screw runs alongside the extrusion and engages with the nut attached to the moving carriage. The carriage is constrained by its rollers, allowing it to travel along the extrusion without rotating along with the screw.
+
+The syringe holder is mounted at the opposite end. Once the syringe is installed, its plunger rests against the pusher attached to the carriage. The mechanical arrangement allows the motor to move the plunger in either direction.
+
+More detailed assembly photographs and CAD files will be added to the repository as the documentation is updated.
+
+## BOM
+
+The following is the bill of materials for the build. All the components were already available to us, so the actual money spent on this build was ₹0. The prices below are the approximate replacement costs of the components.
+
+| Component | Details | Quantity | Price |
+|---|---|---:|---:|
+| 3D printed parts | Custom mechanical components; relatively little filament used | 1 set | ₹0 |
+| Stepper motor + driver | 28BYJ-48 5V with ULN2003 driver board | 1 | ₹100 |
+| T8 lead screw | 8 mm diameter, 2 mm pitch, 4-start | 1 | ₹270 |
+| LCD display | JHD162A or similar 16x2 LCD with I2C backpack | 1 | ₹180 |
+| Arduino Uno | UNO R3 compatible board | 1 | ₹250 |
+| **Total** | | | **₹800 ($8.55)** |
+
+Purchase links and the complete BOM are available in [`BOM.csv`](BOM.csv).
+
+## Known issues and things to improve
+
+The flow rate displayed by the firmware is currently a theoretical calculation based on the syringe diameter and lead screw movement. Actual delivered flow can differ due to mechanical friction, backlash, variations in the syringe dimensions and the performance of the stepper motor. The system will need to be calibrated against measured liquid output to establish how closely the displayed rate matches the actual flow rate.
+
+The current firmware also uses an approximate steps-per-revolution value for the 28BYJ-48, and the actual motor speed should be checked during calibration. The maximum speed is currently limited to 10 RPM.
+
+[ADD: Any other known issues or improvements]
+
+## Repository structure
 
 ```text
-/
-├── README.md               # Main project overview, motivation, and guide
-├── BOM.csv                 # Itemized Bill of Materials with parts and pricing
-├── LICENSE                 # Open-source MIT License
-├── CAD/                    # 3D models, STEP files, and custom bracket geometry
+Syringe_pump/
+│
+├── CAD/
+│   └── [CAD source files and exports]
+│
+├── docs/
+│   └── [Assembly, wiring and other documentation]
+│
+├── Firmware/
+│   ├── Arduino-code.cpp
 │   └── README.md
-├── Electronics/            # Wiring diagrams, pinouts, and electrical layout
-│   └── README.md
-├── Firmware/               # Source code, config files, and flashing steps
-│   └── README.md
-├── Production/             # 3D print profiles, slicing settings, and 3MF files
-│   └── README.md
-└── docs/                   # Detailed technical documentation
-    ├── assembly.md         # Teardown and mechanical assembly guide
-    ├── electronics.md      # Wiring, stepper tuning, and power distribution
-    ├── firmware.md         # Kinematics config and cold extrusion bypass
-    ├── calibration.md      # Linear and gravimetric volume calibration
-    ├── troubleshooting.md  # Diagnostic guide for hardware and motion faults
-    └── safety.md           # Mechanical pinch hazards and electrical safety
-```
-
----
-
-## Hardware & Bill of Materials
-
-The complete inventory of donor hardware, fasteners, and printed parts is documented in [`BOM.csv`](BOM.csv).
-
-Key hardware elements include:
-- Base Frame: Creality Ender 3 donor chassis
-- Syringe: `[SPECIFY: Syringe model and volume, e.g. 10mL / 20mL / 50mL]`
-- Custom 3D Printed Parts: Syringe cradle, plunger pusher, limit switch mount
-- Fasteners: Assorted M3, M4, and M5 hardware with drop-in T-nuts
-- Controller: `[SPECIFY: Controller board model]`
-- Power: `[SPECIFY: Stock 24V PSU / External supply]`
-
----
-
-## Getting Started
-
-### 1. Mechanical Assembly
-Detailed teardown of the Ender 3 and assembly instructions for the syringe brackets can be found in [docs/assembly.md](docs/assembly.md).
-
-`[INSERT PHOTO: Mechanical subassembly in progress]`
-
-### 2. Electronics & Wiring
-Instructions for wiring the stepper motor, connecting limit switches, and isolating unused heater terminals are in [docs/electronics.md](docs/electronics.md).
-
-`[INSERT DIAGRAM: Electronics wiring]`
-
-### 3. Firmware Flashing
-Configuration details, steps/mm calculations, and cold-extrusion safety overrides are documented in [docs/firmware.md](docs/firmware.md).
-
-`[ADD LINK: Firmware source]`
-
----
-
-## Operation & Control
-
-The syringe pump accepts standard G-code over USB serial (via Pronterface, OctoPrint, or a custom Python script):
-
-```gcode
-; Example Dispense Routine
-G28 [AXIS]          ; Home axis against limit switch
-G90                 ; Set absolute coordinate mode
-G1 [AXIS]10 F120    ; Fast approach / prime plunger
-G91                 ; Switch to relative coordinate mode
-G1 [AXIS]5.2 F30    ; Dispense 5.2 mm of plunger travel at 30 mm/min
-G1 [AXIS]-0.2 F200  ; Quick retraction to prevent dripping
-M84                 ; De-energize stepper motor
-```
-
----
-
-## Calibration & Testing
-
-Accuracy is verified through two phases:
-1. **Linear Dry Calibration**: Verifying carriage travel against digital calipers.
-2. **Gravimetric Wet Calibration**: Dispensing water onto a precision digital balance ($1.000\text{ g} \approx 1\text{ mL}$) across multiple target volumes.
-
-Detailed procedures, test logs, and calibration data tables are in [docs/calibration.md](docs/calibration.md).
-
-`[ADD DATA: Calibration results]`
-
----
-
-## Safety
-
-Review [docs/safety.md](docs/safety.md) before powering the system. Key precautions:
-- Keep hands clear of lead screw pinch points.
-- Verify endstop triggers before running automated routines to prevent syringe rupture.
-- Never use this DIY system for clinical or medical applications.
-
----
-
-## Relevant Links
-
-- **Hack Club Forge Project Journal**: `[ADD LINK: Hack Club Forge Project Journal]`
-- **Official Hack Club Forge**: [hackclub/forge](https://github.com/hackclub/forge)
-- **CAD Repository / Releases**: `[ADD LINK: CAD download / release link]`
-- **Firmware Repository**: `[ADD LINK: Firmware source]`
-
+│
+├── BOM.csv
+├── .gitignore
+└── README.md
