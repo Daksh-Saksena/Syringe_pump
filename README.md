@@ -104,9 +104,9 @@ LCD I2C address: `0x27`
 We alr had all the components so it was free for us. (formatted by chatgpt cus idk how to make a table in .md)
 | Component | Details | Quantity | Price |
 |---|---|---:|---:|
-| 3D printed parts | Custom mechanical components; relatively little filament used | 1 set | ₹0 |
-| Stepper motor + driver | 28BYJ-48 5V with ULN2003 driver board | 1 | ₹100 |
-| T8 lead screw | 8 mm diameter, 2 mm pitch, 4-start | 1 | ₹270 |
+| 3D printed parts | Most of the parts and relatively little filament used | 1  | ₹0 |
+| Stepper motor + driver | 28BYJ48 5V with ULN2003 driver board | 1 | ₹100 |
+| T8 lead screw | 8 mm diameter, 2 mm pitch, 4 start | 1 | ₹270 |
 | LCD display | JHD162A or similar 16x2 LCD with I2C backpack | 1 | ₹180 |
-| Arduino Uno | UNO R3 compatible board | 1 | ₹250 |
+| Arduino Uno | UNO R3  | 1 | ₹250 |
 | **Total** | | | **₹800 ($8.55)** |
