@@ -11,7 +11,8 @@ Commercial syringe pumps ARE VERRRYYYY expensive (60$+), especially when all I r
 
 ## How it works
 
-![Full](docs/Full.png)
+![Full](docs/Full1.png)
+![Full](docs/Full2.png)
 
 The main structure is built around an extrusion which acts as the guide for the moving carriage. At one end, a 28BYJ48 stepper motor drives a T8 threaded lead screw. As the screw rotates, it moves a constrained carriage forward or backward along the extrusion. The carriage rides on rollers and has a pusher attached to it, which presses against the syringe plunger.
 
